@@ -1,7 +1,7 @@
 const fs = require("fs");
 const path = require("path");
 
-const NOTES_DIR = path.join(__dirname, "notes");
+const NOTES_DIR = path.join(__dirname, "notlar");
 
 function listFiles(dir, base = "") {
   let results = [];
@@ -28,7 +28,7 @@ const rows = files
     const isHtml = ext === "html" || ext === "htm";
     const icon = isPdf ? "📄" : isHtml ? "🌐" : "📁";
     const label = "Aç";
-    const href = "notes/" + encodeURI(f);
+    const href = "notlar/" + encodeURI(f);
     const name = f.split("/").pop();
     const folder = f.includes("/") ? f.slice(0, f.lastIndexOf("/")) : "";
     return `<tr>
@@ -70,7 +70,7 @@ const html = `<!DOCTYPE html>
 <body>
   <h1>📚 Notlarım</h1>
   <div class="count">${files.length} dosya</div>
-  ${files.length === 0 ? '<div class="empty">Henüz dosya yok. notes/ klasörüne dosya ekleyip GitHub\\'a push yapın.</div>' : `
+  ${files.length === 0 ? '<div class="empty">Henüz dosya yok. notlar/ klasörüne dosya ekleyin.</div>' : `
   <table>
     <thead><tr><th></th><th>Dosya</th><th>Klasör</th><th>Tür</th><th>İşlem</th></tr></thead>
     <tbody>${rows}</tbody>
