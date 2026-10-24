@@ -63,7 +63,7 @@ for (const file of files) {
 const cards = SUBJECTS.map((s, i) => {
   const count = notes.filter((n) => n.subject === s.id).length;
   return '<button class="subject-card ' + s.tone + '" type="button" data-subject="' + s.id + '" style="--i:' + i + '">' +
-    '<span class="card-art art-' + s.id + '" aria-hidden="true"><span class="art-symbol">' + ({biyoloji:"✳",matematik:"∑",kimya:"⚗",fizik:"◎",turkce:"Aa"}[s.id] || "✳") + '</span><span class="art-label">' + s.mark + '</span></span>' +
+    '<span class="card-art art-' + s.id + '" aria-hidden="true"><span class="art-symbol">' + ({biyoloji:"✳",matematik:"∑",kimya:"⚗",fizik:"◎",turkce:"Aa"}[s.id] || "✳") + '</span><span class="art-label">' + s.mark + '</span><span class="art-caption">' + s.name + '</span></span>' +
     '<span class="card-body"><span class="subject-name">' + s.name + '</span><span class="subject-description">' + s.desc + '</span>' +
     '<span class="card-bottom"><span class="subject-count">' + count + ' not</span><span class="card-arrow" aria-hidden="true">↗</span></span></span></button>';
 }).join("\n");
