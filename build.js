@@ -2,6 +2,10 @@ const fs = require("fs");
 const path = require("path");
 
 const NOTES_DIR = path.join(__dirname, "notlar");
+const PUBLIC_DIR = path.join(__dirname, "public");
+
+if (fs.existsSync(PUBLIC_DIR)) fs.rmSync(PUBLIC_DIR, { recursive: true, force: true });
+fs.mkdirSync(PUBLIC_DIR, { recursive: true });
 
 function listFiles(dir, base = "") {
   let results = [];
@@ -19,6 +23,14 @@ function listFiles(dir, base = "") {
 let files = [];
 if (fs.existsSync(NOTES_DIR)) {
   files = listFiles(NOTES_DIR).sort((a, b) => a.localeCompare(b, "tr"));
+}
+
+fs.mkdirSync(path.join(PUBLIC_DIR, "notlar"), { recursive: true });
+for (const f of files) {
+  const src = path.join(NOTES_DIR, f);
+  const dst = path.join(PUBLIC_DIR, "notlar", f);
+  fs.mkdirSync(path.dirname(dst), { recursive: true });
+  fs.copyFileSync(src, dst);
 }
 
 const rows = files
@@ -78,5 +90,5 @@ const html = `<!DOCTYPE html>
 </body>
 </html>`;
 
-fs.writeFileSync(path.join(__dirname, "index.html"), html, "utf8");
+fs.writeFileSync(path.join(PUBLIC_DIR, "index.html"), html, "utf8");
 console.log(`index.html oluşturuldu — ${files.length} dosya listelendi.`);
