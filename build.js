@@ -71,9 +71,7 @@ button:focus-visible,input:focus-visible,a:focus-visible{outline:3px solid var(-
 .app{min-height:100vh;min-height:100svh;display:flex;flex-direction:column}
 
 .top{display:flex;align-items:center;justify-content:space-between;gap:14px;height:64px;padding:0 var(--px);flex:none}
-.brand{display:flex;align-items:center;gap:10px;font-family:var(--serif);font-size:20px;font-weight:700;letter-spacing:-.02em;transform-origin:center;will-change:transform,opacity}.brand i{width:10px;height:10px;border-radius:50%;background:var(--e)}
-.brand.intro{animation:brand-arrive .95s cubic-bezier(.2,.8,.2,1) both}
-@keyframes brand-arrive{from{transform:translate(var(--intro-x,0px),var(--intro-y,0px)) scale(1.35);opacity:.3}to{transform:translate(0,0) scale(1);opacity:1}}
+.brand{display:flex;align-items:center;gap:10px;font-family:var(--serif);font-size:20px;font-weight:700;letter-spacing:-.02em}.brand i{width:10px;height:10px;border-radius:50%;background:var(--e)}
 .search{position:relative;width:min(280px,58%)}.search-icon{position:absolute;left:14px;top:50%;transform:translateY(-50%);color:var(--mu);font-size:16px;pointer-events:none}
 .search input{width:100%;height:40px;padding:0 14px 0 38px;border:1px solid var(--bd);border-radius:99px;background:var(--cd);font-size:14px;outline:none;transition:border-color .2s,box-shadow .2s}.search input::placeholder{color:var(--mu)}.search input:focus{border-color:var(--e);box-shadow:0 0 0 4px rgba(232,99,10,.15)}
 
@@ -124,7 +122,7 @@ button:focus-visible,input:focus-visible,a:focus-visible{outline:3px solid var(-
 .halves{grid-template-columns:1fr}.half+.half{border-left:0;border-top:1px solid var(--bd)}.hname{font-size:clamp(56px,20vw,96px)}
 .nrow{grid-template-columns:34px minmax(0,1fr) auto}.nno span{display:none}.next span{display:none}
 }
-@media(prefers-reduced-motion:reduce){*,*:before,*:after{animation-duration:.01ms!important;transition-duration:.01ms!important}.brand.intro{animation:none!important}}
+@media(prefers-reduced-motion:reduce){*,*:before,*:after{animation-duration:.01ms!important;transition-duration:.01ms!important}}
 `;
 
 const CLIENT = String.raw`
@@ -135,7 +133,7 @@ let activeSubject=null;
 function normText(v){return String(v).toLocaleLowerCase("tr-TR").replace(/ı/g,"i").replace(/İ/g,"i").normalize("NFD").replace(/[\u0300-\u036f]/g,"")}
 function escText(v){return String(v).replace(/[&<>"']/g,function(c){return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]})}
 function pad(i){return (i+1<10?"0":"")+(i+1)}
-function noteRow(n,i){const ex=(n.exam==="TYT"||n.exam==="AYT")?n.exam+" · ":"";const s=subj(n.subject);const subjectName=s?s.name:"Diğer";return '<a class="nrow" data-note-file="'+escText(n.file)+'" href="'+escText(n.href)+'" target="_blank" rel="noopener noreferrer"><span class="nno"><i></i><span>'+pad(i)+'</span></span><span><span class="ntitle">'+escText(n.title)+'</span><span class="nmeta">'+escText(subjectName+" · "+ex+n.filename)+'</span></span><span class="next"><span>'+escText(n.ext)+'</span><b>↗</b></span></a>'}
+function noteRow(n,i){const ex=(n.exam==="TYT"||n.exam==="AYT")?n.exam+" · ":"";return '<a class="nrow" href="'+escText(n.href)+'" target="_blank" rel="noopener noreferrer"><span class="nno"><i></i><span>'+pad(i)+'</span></span><span><span class="ntitle">'+escText(n.title)+'</span><span class="nmeta">'+escText(ex+n.filename)+'</span></span><span class="next"><span>'+escText(n.ext)+'</span><b>↗</b></span></a>'}
 function subj(id){return SUBJECTS.find(function(x){return x.id===id})}
 
 function showHome(){home.classList.remove("hidden");examView.classList.add("hidden");notesView.classList.add("hidden");activeSubject=null;window.scrollTo(0,0)}
@@ -154,14 +152,9 @@ rows.querySelectorAll("[data-subject]").forEach(function(b){b.addEventListener("
 $("backHome").addEventListener("click",showHome);
 $("backExams").addEventListener("click",function(){const s=subj(activeSubject);if(!s||s.noExam)showHome();else showSubject(activeSubject)});
 
-function recentNote(){try{const raw=localStorage.getItem("dersArsiviRecentNote");if(!raw)return null;const saved=JSON.parse(raw);return NOTES.find(function(n){return n.file===saved.file})||null}catch(_){return null}}
-function showRecentOrSearch(){const q=searchInput.value.trim();if(q){runSearch(q);return}rows.classList.add("hidden");searchResults.classList.remove("hidden");const recent=recentNote();searchResults.innerHTML=recent?'<h3>Son açtığın not</h3><div style="margin:14px calc(var(--px)*-1) 0;border-top:1px solid var(--bd)">'+noteRow(recent,0)+'</div>':'<h3>Son açtığın not</h3><div class="empty" style="margin:16px 0 0">Henüz bir not açmadın.<br>Açtığın son not burada görünecek.</div>'}
-function runSearch(value){const q=normText(String(value||"").trim());if(!q){if(document.activeElement===searchInput){showRecentOrSearch();return}searchResults.classList.add("hidden");rows.classList.remove("hidden");return}const found=NOTES.filter(function(n){const s=subj(n.subject);return normText([n.title,n.filename,s?s.name:n.subject,n.exam].join(" ")).includes(q)});rows.classList.add("hidden");searchResults.classList.remove("hidden");searchResults.innerHTML="<h3>"+found.length+" sonuç bulundu</h3>"+(found.length?'<div style="margin:14px calc(var(--px)*-1) 0;border-top:1px solid var(--bd)">'+found.map(noteRow).join("")+"</div>":'<div class="empty" style="margin:16px 0 0">Bu aramayla eşleşen not yok.<br>Başka bir kelime deneyebilirsin.</div>')}
-searchInput.addEventListener("focus",function(){if(!searchInput.value.trim())showRecentOrSearch()});
-searchInput.addEventListener("blur",function(){window.setTimeout(function(){if(!searchInput.value.trim()){searchResults.classList.add("hidden");rows.classList.remove("hidden")}},120)});
-searchInput.addEventListener("input",function(){runSearch(searchInput.value)});
-document.addEventListener("click",function(event){const link=event.target.closest&&event.target.closest("a.nrow[data-note-file]");if(!link)return;const note=NOTES.find(function(n){return n.file===link.dataset.noteFile});if(!note)return;try{localStorage.setItem("dersArsiviRecentNote",JSON.stringify({file:note.file,openedAt:Date.now()}))}catch(_){}});
-(function animateBrand(){const brand=document.querySelector(".brand");if(!brand)return;let played=false;try{played=sessionStorage.getItem("dersArsiviLogoIntro")==="1"}catch(_){}if(played||window.matchMedia("(prefers-reduced-motion: reduce)").matches)return;const rect=brand.getBoundingClientRect();const dx=window.innerWidth/2-(rect.left+rect.width/2);const dy=window.innerHeight/2-(rect.top+rect.height/2);brand.style.setProperty("--intro-x",dx+"px");brand.style.setProperty("--intro-y",dy+"px");brand.classList.add("intro");try{sessionStorage.setItem("dersArsiviLogoIntro","1")}catch(_){}brand.addEventListener("animationend",function(){brand.classList.remove("intro");brand.style.removeProperty("--intro-x");brand.style.removeProperty("--intro-y")},{once:true})})();
+searchInput.addEventListener("input",function(){const q=normText(searchInput.value.trim());if(!q){searchResults.classList.add("hidden");rows.classList.remove("hidden");return}
+const found=NOTES.filter(function(n){return normText([n.title,n.filename,n.subject,n.exam].join(" ")).includes(q)});rows.classList.add("hidden");searchResults.classList.remove("hidden");
+searchResults.innerHTML="<h3>"+found.length+" sonuç bulundu</h3>"+(found.length?'<div style="margin:14px calc(var(--px)*-1) 0;border-top:1px solid var(--bd)">'+found.map(noteRow).join("")+"</div>":'<div class="empty" style="margin:16px 0 0">Bu aramayla eşleşen not yok.<br>Başka bir kelime deneyebilirsin.</div>')});
 `;
 
 const subjectsClient = SUBJECTS.map(({ id, name, color, noExam }) => ({ id, name, color, noExam: !!noExam }));
